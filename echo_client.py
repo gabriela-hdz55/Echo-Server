@@ -24,12 +24,20 @@ def main():
     clientSock.connect((serverIP, serverPort))
     data = input("Please enter the message: ")
     print("Sending ", data)
-    clientSock.send(data.encode())
-    recvData = clientSock.recv(BUF_SIZE)
-    if not recvData:
-        print("Error reading from client socket")
-        exit(1)
-    print("Receiving ", recvData.decode())
+
+    message = data.encode()
+    clientSock.sendall(message)
+    sent_length = len(message)
+
+    recvData = b'' # collection of received data
+    while len(recvData) < sent_length:
+        chunk = clientSock.recv(BUF_SIZE) # gets data in allowed size
+        if not chunk: # no more data
+            print("Error: Connection closed before receiving all data")
+            exit(1)
+        recvData += chunk
+
+    print("Receiving ", recvData.decode()) # data received
     clientSock.close()
 
 
